@@ -40,6 +40,8 @@ void Print_vector(double local_b[], int local_n, int n, char title[],
 void Parallel_vector_sum(double local_x[], double local_y[],
       double local_z[], int local_n);
 
+double dotProduct(double local_x[], double local_y[], int local_n);
+
 
 /*-------------------------------------------------------------------*/
 int main(void) {
@@ -55,7 +57,7 @@ int main(void) {
    MPI_Comm_rank(comm, &my_rank);
 
    //Read_n(&n, &local_n, my_rank, comm_sz, comm);
-   n = 100000;
+   n = 10;
    local_n = n/comm_sz;
    tstart = MPI_Wtime();
    Allocate_vectors(&local_x, &local_y, &local_z, local_n, comm);
@@ -69,8 +71,14 @@ int main(void) {
    tend = MPI_Wtime();
 
    Print_vector(local_z, local_n, n, "The sum is", my_rank, comm);
-   if(my_rank==0)
+   double dot = dotProduct(local_x, local_y, local_n);
+
+   double dotTotal;
+   MPI_Reduce(&dot, &dotTotal, 1, MPI_DOUBLE, MPI_SUM, 0, comm);
+   if(my_rank==0){
     printf("\nTook %f ms to run\n", (tend-tstart)*1000);
+    printf("Dot product is %f \n", dotTotal);
+      }
 
    free(local_x);
    free(local_y);
@@ -312,3 +320,13 @@ void Parallel_vector_sum(
    for (local_i = 0; local_i < local_n; local_i++)
       local_z[local_i] = local_x[local_i] + local_y[local_i];
 }  /* Parallel_vector_sum */
+
+double dotProduct(double local_x[], double local_y[], int local_n){
+   int local_i;
+   double local_dot = 0.0;
+
+   for (local_i = 0; local_i < local_n; local_i++)
+       local_dot += local_x[local_i] * local_y[local_i];
+
+      return local_dot;
+}
