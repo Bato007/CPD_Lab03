@@ -30,6 +30,7 @@ int main(void) {
    double *x, *y, *z;
 
    Read_n(&n);
+   clock_t begin = clock();
    Allocate_vectors(&x, &y, &z, n);
    srand(time(NULL));
    Generate_Vector_Random(x, n, "x");
@@ -38,15 +39,19 @@ int main(void) {
    Generate_Vector_Random(y, n, "y");
    Print_vector(y, n, "\nThe second vector is");
    Vector_sum(x, y, z, n);
+   clock_t end = clock();
 
    Print_vector(z, n, "\nThe sum is");
+
+   double time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+   printf("Time to make operations: %lf\n", time_spent);
 
    free(x);
    free(y);
    free(z);
 
    return 0;
-}  /* main */
+}  /* main  */
 
 /*---------------------------------------------------------------------
  * Function:  Read_n
